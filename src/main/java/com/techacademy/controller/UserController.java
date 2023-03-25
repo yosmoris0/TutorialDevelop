@@ -1,5 +1,6 @@
 package com.techacademy.controller;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,8 @@ public class UserController {
     @GetMapping("/list")
     public String getList(Model model) {
         // 全件検索結果をModelに登録
-        model.addAttribute("userlist", service.getUserList());
+        List<User> userList = service.getUserList();
+        model.addAttribute("userlist", userList);
         // user/list.htmlに画面遷移
         return "user/list";
     }
@@ -58,20 +60,36 @@ public class UserController {
 
     /** User更新画面を表示 */
     @GetMapping("/update/{id}/")
-    public String getUser(@PathVariable("id") Integer id, Model model) {
+    // (★修正)
+    public String getUser(@PathVariable Integer id, User user, Model model) {
+        // (★追加)
+        User user2 = id != null ? service.getUser(id) : user;
         // Modelに登録
-        model.addAttribute("user", service.getUser(id));
+        model.addAttribute("user", user2);
         // User更新画面に遷移
         return "user/update";
     }
 
     /** User更新処理 */
     @PostMapping("/update/{id}/")
-    public String postUser(User user) {
+    // (★修正)
+    public String postUser(@Validated User user, BindingResult res, Model model) {
+        // (★追加)
+        if(res.hasErrors()) {
+            // エラーあり
+            return getUser(null, user, model);
+        }
+
         // User登録
         service.saveUser(user);
         // 一覧画面にリダイレクト
         return "redirect:/user/list";
+    }
+
+    // (★追加)
+    private String getUser(User user) {
+        // TODO 自動生成されたメソッド・スタブ
+        return null;
     }
 
     /** User削除処理 */
